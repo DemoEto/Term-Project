@@ -1,40 +1,52 @@
+const { response } = require("express");
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const { Pool } = require('pg');
-
-const pool = new Pool({
-  user: 'root',
-  host: 'localhost',
-  database: 'term_project_db',
-  password: '',
-  port: 3306,
-});
-
-const app = express();
-app.use(bodyParser.json());
-
-//ทดลองการเชื่อม database 
-// const database = pool.query("SELECT * FROM users");
-// console.log(database);
+let mysql = require('mysql');
+const env = require('../env.js');
+const config = require('../dbconfig.js')[env];
 
 const login = async (req, res = response) => {
   const { email, password } = req.body;
-  try {
-    const result = await pool.query('SELECT * FROM users WHERE email = $1 AND password = $2', [email, password]);
-    
-    if (result.rows.length > 0) {
-      res.status(200).send({ message: 'Login successful' });
-    } else {
-      res.status(401).send({ message: 'Invalid username or password' });
+
+ // const email = req.body.email;
+ // const password  = req.body.password;
+
+  //----------------------
+
+  let dbcon = mysql.createConnection(config);
+
+  const userDetails = "SELECT * FROM users where email = '" + email + "'";
+  console.log(userDetails);
+
+  dbcon.query(userDetails, function (err, user) {
+    console.log(user);
+
+    if (user.length > 0) {
+
+      if (password !== user[0].password) {
+        return res.status(400).json({
+          msg: "User / Password are incorrect",
+        });
+      }
+
+      res.status(200).json({ user })
+
+      /*
+            res.json({
+              name: "Test User",
+              token: "A JWT token to keep the user logged in.",
+              msg: "Successful login",
+            });
+      */
+
+    } else { //  if (user.length > 0) 
+
+      // User not found
+      return res.status(401).json({ message: "User not found !" })
+
     }
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).send({ message: 'An error occurred' });
-  }
+  })
 
 };
-
 
 module.exports = {
   login,
