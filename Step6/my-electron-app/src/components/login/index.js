@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Container, Form, Button, Alert, Card } from "react-bootstrap";
-import { login } from "../../api";
+import { login } from "../../api/";
 
 function Login({ onLoginSuccessful }) {
   const [email, setEmail] = useState("");
@@ -10,6 +10,7 @@ function Login({ onLoginSuccessful }) {
   const onEmailChange = (event) => setEmail(event.target.value);
   const onPasswordChange = (event) => setPassword(event.target.value);
 
+  // ส่งข้อมูลการเข้าสู่ระบบไปยัง Backend
   const onSubmit = async (event) => {
     event.preventDefault();
     setHasError(false);
